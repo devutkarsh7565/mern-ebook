@@ -2,9 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import { cloudinary } from "../config/cloudinary";
 import path from "node:path";
 import createHttpError from "http-errors";
+import bookModel from "./bookModel";
+import fs from "node:fs";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   console.log("files", req.files);
+
+  const { title, genre } = req.body;
 
   // 'image/png'
   // we have to only select png
@@ -43,12 +47,35 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
     );
 
     console.log("upload result", uploadResult, bookFileUploadResult);
+
+    const newBook = await bookModel.create({
+      title,
+      genre,
+      author: "66682917bd4849df2f89dabd",
+      coverImage: uploadResult.secure_url,
+      file: bookFileUploadResult.secure_url,
+    });
+
+    // delete temp files from public folder
+    try {
+      await fs.promises.unlink(filePath);
+      await fs.promises.unlink(bookFilePath);
+    } catch (err) {
+      console.log(err);
+      return next(
+        createHttpError(
+          500,
+          "error while deleting temp files from public folder"
+        )
+      );
+    }
+    res
+      .status(201)
+      .json({ message: "ebook created sucessfully", id: newBook._id });
   } catch (err) {
     console.log(err);
     return next(createHttpError(500, "error while uploading the files"));
   }
-
-  res.json({ message: "ok book" });
 };
 
 export { createBook };
