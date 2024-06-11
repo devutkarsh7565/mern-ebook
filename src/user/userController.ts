@@ -48,10 +48,14 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       expiresIn: "7d",
     });
 
-    res.json({ id: newUser._id, accessToken: token });
+    res.status(201).json({ id: newUser._id, accessToken: token });
   } catch (err) {
     return next(createHttpError(500, "Error while signing jwt token"));
   }
 };
 
-export { createUser };
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+  res.json({ message: "ok" });
+};
+
+export { createUser, loginUser };
