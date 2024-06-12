@@ -205,4 +205,19 @@ const getAllBooks = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { createBook, updateBook, getAllBooks };
+const getSingleBooks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { bookId } = req.params;
+  //add pagination with package mongoose pagination => try it
+  try {
+    const singleBook = await bookModel.findOne({ _id: bookId });
+    res.json({ singleBook });
+  } catch (err) {
+    return next(createHttpError(500, "error while getting a books"));
+  }
+};
+
+export { createBook, updateBook, getAllBooks, getSingleBooks };
